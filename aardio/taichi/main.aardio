@@ -1,0 +1,226 @@
+//自绘动画
+import win.ui;
+/*DSG{{*/
+var winform = win.form(text="太极";left=0;top=0;right=540;bottom=360;border="thin";max=false;min=false)
+winform.add(
+button={cls="button";text="+1";left=125;top=284;right=195;bottom=314;db=1;dl=1;z=2};
+button2={cls="button";text="+2";left=205;top=284;right=275;bottom=314;db=1;dr=1;z=3};
+button3={cls="button";text="停止";left=45;top=323;right=115;bottom=353;db=1;dl=1;z=6};
+button4={cls="button";text="模式";left=45;top=284;right=115;bottom=314;db=1;dl=1;z=7};
+button5={cls="button";text="-1";left=125;top=323;right=195;bottom=353;db=1;dl=1;z=8};
+button6={cls="button";text="-2";left=205;top=323;right=275;bottom=353;db=1;dr=1;z=9};
+button7={cls="button";text="演示";left=415;top=283;right=485;bottom=313;db=1;dr=1;z=15};
+edit={cls="edit";text="步长";left=325;top=284;right=405;bottom=314;align="right";autohscroll=false;autovscroll=false;edge=1;multiline=1;num=1;z=10};
+edit2={cls="edit";text="速度";left=325;top=323;right=405;bottom=353;align="center";autohscroll=false;autovscroll=false;edge=1;hidesel=1;num=1;z=14};
+plus={cls="plus";left=30;top=50;right=240;bottom=260;db=1;dl=1;dt=1;z=1};
+plus2={cls="plus";left=300;top=50;right=510;bottom=260;db=1;dr=1;dt=1;z=5};
+spin={cls="spin";left=385;top=284;right=405;bottom=314;db=1;dl=1;nthousands=1;z=12};
+static={cls="static";left=415;top=323;right=495;bottom=353;align="center";center=1;db=1;dr=1;transparent=1;z=4};
+static2={cls="static";text="步长";left=285;top=284;right=325;bottom=314;align="center";center=1;transparent=1;z=11};
+static3={cls="static";text="速度";left=285;top=323;right=325;bottom=353;align="center";center=1;transparent=1;z=13};
+static4={cls="static";text="太极生两仪";left=120;top=5;right=420;bottom=35;align="center";center=1;hide=1;notify=1;ownerDraw=1;transparent=1;z=16}
+)
+/*}}*/
+
+import win.timer
+var timer = win.timer( winform );
+
+var speed = 1
+var step = 1
+var time_begin = 0
+
+//绘图函数
+winform.plus.onDrawContent = function(graphics,rc){
+    
+    //旋转画板 
+	graphics.rotateRect(rc,winform.plus.animationState);
+ 
+ 	//创建画刷
+    var brush = gdip.solidBrush(0xFFFFFFFF);
+    var brush2 = gdip.solidBrush(0xFF000000);
+    
+    //画左右半圆
+    var w,h = rc.width(),rc.height();
+    graphics.fillPie(brush, 0, 0, w, h, 90, 180);
+    graphics.fillPie(brush2, 0, 0, w, h, 90, -180);
+    
+ 	//画鱼头
+    graphics.fillPie(brush, w/4-1, h/2, w/2, h/2, 90, -180);
+ 	graphics.fillPie(brush2, w/4+1, 0, w/2, h/2, 90, 180);
+    
+    //画鱼眼
+    graphics.fillEllipse(brush, w/2-10, h/4-10, 20, 20);
+    graphics.fillEllipse(brush2, w/2-10, h/4*3-10, 20, 20);
+       
+    brush.delete();
+    brush2.delete();
+}
+
+//绘图函数
+winform.plus2.onDrawContent = function(graphics,rc){
+    
+    //旋转画板 
+	graphics.rotateRect(rc,winform.plus.animationState);
+ 
+ 	//创建画刷
+    var brush = gdip.solidBrush(0xFF000000);
+    var brush2 = gdip.solidBrush(0xFFFFFFFF);
+    
+    //画左右半圆
+    var w,h = rc.width(),rc.height();
+    graphics.fillPie(brush, 0, 0, w, h, 90, 180);
+    graphics.fillPie(brush2, 0, 0, w, h, 90, -180);
+    
+ 	//画鱼头
+ 	graphics.fillPie(brush, w/4-1, 0, w/2, h/2, -90, 180);
+ 	graphics.fillPie(brush2, w/4+1, h/2, w/2, h/2, -90, -180);
+ 	
+    //画鱼眼
+    graphics.fillEllipse(brush2, w/2-10, h/4-10, 20, 20);
+    graphics.fillEllipse(brush, w/2-10, h/4*3-10, 20, 20);
+       
+    brush.delete();
+    brush2.delete();
+}
+
+//动画状态控制函数
+winform.plus.onAnimation = function(state){
+	return state + speed;
+}
+winform.plus2.onAnimation = function(state){
+	return state + speed;
+}
+
+
+//开始动画
+winform.plus.startAnimation(1,0);
+winform.plus2.startAnimation(1,0);
+
+winform.button.oncommand = function(id,event){
+	speed += 1
+	winform.static.text = "速度 " + speed
+}
+
+winform.button2.oncommand = function(id,event){
+	speed += winform.edit.text
+	winform.static.text = "速度 " + speed
+}
+
+winform.button3.oncommand = function(id,event){
+	speed = 0;
+	winform.static.text = "已停止";
+	timer.disable();
+	winform.static4.hide = true;
+}
+
+winform.button4.oncommand = function(id,event){
+	if (winform.plus.hide == 0 && winform.plus2.hide == 0){
+		winform.plus2.hide = 1
+	}elseif (winform.plus.hide == 1 && winform.plus2.hide == 0) {
+		winform.plus.hide = 0
+		winform.plus2.hide = 0	
+	}elseif (winform.plus.hide == 0 && winform.plus2.hide == 1){
+		winform.plus.hide = 1
+		winform.plus2.hide = 0	
+	}
+}
+
+winform.button5.oncommand = function(id,event){
+	speed -= 1
+	if(speed < 0){
+		speed = 0
+		return ; 
+	}
+	winform.static.text = "速度 " + speed
+}
+
+winform.button6.oncommand = function(id,event){
+	var speed_old = speed
+	speed -= winform.edit.text
+	if(speed < 0){
+		speed = speed_old
+		return ; 
+	}
+	winform.static.text = "速度 " + speed
+}
+
+winform.spin.buddy = winform.edit; 
+winform.spin.setRange(2, 1000);
+winform.spin.pos = 2;
+winform.spin.inc = 1;
+
+//处理spin事件
+winform.spin.oncommand = function(id,event,pos){ 
+	if( pos && event == 0x4/*_SB_THUMBPOSITION*/ ){
+		winform.button2.text = "+" + winform.edit.text
+		winform.button6.text = "-" + winform.edit.text
+	}
+} 
+
+//处理spin事件通知,将要改变值之前触发
+winform.spin.onnotify = function(id,code,ptr){ 
+	if(code==0xFFFFFD2E/*_UDN_DELTAPOS*/){
+		var nmUpDown = ..raw.convert(ptr, {
+			struct hdr = ::NMHDR();
+			int pos; //当前位置
+			int delta; //位置的增减量,单击向上箭头此值为负数
+		} );  
+	} 
+}
+
+//spin绑定的文本框事件 
+winform.edit.onOk = function(id,event){ 
+	if (winform.edit.text == ""){
+		winform.edit.text = step
+	}
+	winform.button2.text = "+" + winform.edit.text
+	winform.button6.text = "-" + winform.edit.text
+}
+winform.edit.onFocusGot = function(){ 
+	step = winform.edit.text
+}
+
+// 速度设置
+winform.edit2.text = speed
+winform.edit2.onOk = function(id,event){
+	var speed_old = speed 
+	speed = tonumber(winform.edit2.text)
+	if(speed == null){
+		speed = speed_old
+		return true; 
+	}
+	winform.static.text = "速度 " + speed
+	return true;
+}
+winform.edit2.onFocusLost = function(){
+	winform.edit2.text = speed
+}
+
+
+timer.onTimer = function(hwnd,msg,id,tick){
+	winform.static.text = "演示中"
+	winform.edit2.text = speed
+	time_now = time.tick()
+	interval = time_now - time_begin
+	if (interval > 1000) {
+		speed += 1
+		time_begin = time_now
+	}
+	
+	if (speed > 85){
+		winform.static4.text = "两仪生四象"
+	}elseif (speed > 130){
+		winform.static4.text = "四象生八卦"
+	}
+} 
+
+winform.button7.oncommand = function(id,event){
+	speed = 0;
+	time_begin = time.tick();
+	timer.enable();
+	winform.static4.hide = false
+}
+
+
+winform.show()
+win.loopMessage()
